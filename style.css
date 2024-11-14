@@ -1,0 +1,20 @@
+#sudoku-board {
+    display: grid;
+    grid-template-columns: repeat(9, 50px);
+    grid-template-rows: repeat(9, 50px);
+    gap: 1px;
+    margin-bottom: 20px;
+}
+
+#sudoku-board input {
+    width: 50px;
+    height: 50px;
+    text-align: center;
+    font-size: 18px;
+    border: 1px solid #333;
+}
+
+#sudoku-board input:disabled {
+    background-color: #ddd;
+    font-weight: bold;
+}
