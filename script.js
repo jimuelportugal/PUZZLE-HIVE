@@ -22,60 +22,93 @@ const solution = [
   [3, 4, 5, 2, 8, 6, 1, 7, 9]
 ];
 
-// Generate the puzzle grid dynamically
 function generateBoard() {
-  const table = document.getElementById("sudoku-table");
-  table.innerHTML = "";
-
+  $("#sudoku-table").empty();
   for (let row = 0; row < 9; row++) {
-    const tr = document.createElement("tr");
+    let tr = $("<tr></tr>");
     for (let col = 0; col < 9; col++) {
-      const td = document.createElement("td");
+      let td = $("<td></td>");
+      let id = "Userrow" + row + "cell" + col;
+      td.attr("id", id);
+      
       if (puzzle[row][col] !== 0) {
-        td.innerHTML = puzzle[row][col]; // Pre-filled cells
+        td.text(puzzle[row][col]);
       } else {
-        const input = document.createElement("input");
-        input.type = "number";
-        input.min = 1;
-        input.max = 9;
-        input.id = `cell-${row}-${col}`;
-        td.appendChild(input);
+        let input = $("<input type='number' min='1' max='9' />");
+        input.attr("id", `cell-${row}-${col}`);
+        input.on('input', function() { checkCell(row, col, input); });
+        td.append(input);
       }
-      tr.appendChild(td);
+      
+      tr.append(td);
     }
-    table.appendChild(tr);
+    $("#sudoku-table").append(tr);
   }
 }
 
-// Check if the user's solution is correct
-function checkSolution() {
-  let isCorrect = true;
+function generateSolution() {
+  $("#solution-table").empty();
 
   for (let row = 0; row < 9; row++) {
+    let tr = $("<tr></tr>");
     for (let col = 0; col < 9; col++) {
-      const userInput = document.getElementById(`cell-${row}-${col}`);
-      if (userInput) {
-        const value = parseInt(userInput.value, 10);
-        if (value !== solution[row][col]) {
-          isCorrect = false;
-          userInput.style.backgroundColor = "red";
-        } else {
-          userInput.style.backgroundColor = "green";
-        }
-      }
+      let td = $("<td></td>");
+      let input = $("<input type='number' min='1' max='9' readonly />");
+      input.val(solution[row][col]);
+      let id = "Answerrow" + row + "cell" + col;
+      input.attr("id", id);
+      input.css("display", "none");
+      td.append(input);
+      tr.append(td);
+      
+      console.log("Generated ID: " + id);
     }
+    $("#solution-table").append(tr);
   }
-
-  if (isCorrect) {
-    alert("Congratulations! Your solution is correct.");
-  } else {
-    alert("Some of your answers are incorrect. Please try again.");
-  }
-}
-
-// Reset the board for a new game
-function resetBoard() {
-  generateBoard();
 }
 
 generateBoard();
+generateSolution();
+
+function checkCell(row, col, input) {
+  const userId = `cell-${row}-${col}`;
+  const answerId = `Answerrow${row}cell${col}`;
+
+  const userValue = parseInt($(`#${userId}`).val(), 10);
+  const answerValue = parseInt($(`#${answerId}`).val(), 10);
+
+  if (userValue === answerValue) {
+    $(`#${userId}`).css("background-color", "green");
+  } else if (isNaN(userValue) || userValue === 0) {
+    $(`#${userId}`).css("background-color", "");
+  } else {
+    $(`#${userId}`).css("background-color", "red");
+  }
+
+  checkComplete();
+}
+
+function checkComplete() {
+  let isComplete = true;
+  for (let row = 0; row < 9; row++) {
+    for (let col = 0; col < 9; col++) {
+      if (puzzle[row][col] === 0) {
+        const userId = `cell-${row}-${col}`;
+        const answerId = `Answerrow${row}cell${col}`;
+        
+        const userValue = parseInt($(`#${userId}`).val(), 10);
+        const answerValue = parseInt($(`#${answerId}`).val(), 10);
+
+        if (userValue !== answerValue) {
+          isComplete = false;
+          break;
+        }
+      }
+    }
+    if (!isComplete) break;
+  }
+
+  if (isComplete) {
+    alert("Congratulations! You've completed the puzzle correctly!");
+  }
+}
